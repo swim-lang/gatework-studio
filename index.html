@@ -1,0 +1,965 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gatework Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Jost:wght@400;500;600&display=swap">
+<style>
+/* Layout: a white studio. Sticky control rail on the left, the sheet on the right; black is the only accent. */
+:root{
+  --bg:#FFFFFF; --panel:#FFFFFF; --stage:#FFFFFF; --ink:#000000; --muted:#5F5F5F; --rule:#E3E3E3;
+  --accent:#000000; --focus:#000000; --chip:#F3F3F3;
+  --display:"Bodoni Moda", Didot, "Bodoni 72", Georgia, serif;
+  --ui:"Jost", Futura, "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.5}
+.wrap{max-width:1380px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topline{height:3px;background:var(--ink)}
+header .wrap{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px;padding-block:28px 22px}
+.eyebrow{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);font-weight:600;margin:0 0 6px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(36px,5vw,56px);line-height:1;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 em{font-style:italic}
+.lede{max-width:52ch;margin:10px 0 0;color:var(--muted)}
+.tabs{display:flex;gap:4px;border:1px solid var(--rule);border-radius:999px;padding:4px;background:var(--panel)}
+.tabs button{font:inherit;font-weight:500;font-size:14px;letter-spacing:.04em;border:0;background:transparent;color:var(--muted);padding:8px 18px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.layout{display:grid;grid-template-columns:292px minmax(0,1fr);gap:28px;align-items:start;padding-block:4px 48px}
+@media (max-width:880px){.layout{grid-template-columns:minmax(0,1fr)}.layout > main{order:-1}}
+
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:18px 18px 20px;position:sticky;top:16px;display:grid;gap:18px}
+@media (max-width:880px){.panel{position:static}}
+.group{display:grid;gap:12px}
+.group h2{font-family:var(--display);font-weight:400;font-style:italic;font-size:20px;margin:0;display:flex;align-items:baseline;justify-content:space-between}
+.group h2 small{font-family:var(--ui);font-style:normal;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.only-border{border-bottom:1px solid var(--rule);padding-bottom:18px}
+.field{display:grid;gap:5px}
+.field > span,.lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;justify-content:space-between}
+.field output{font-variant-numeric:tabular-nums;letter-spacing:0;text-transform:none}
+select,input[type=number]{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:3px;padding:7px 9px;width:100%}
+input[type=range]{width:100%;accent-color:var(--ink)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.seg button{font:inherit;font-size:13.5px;border:0;background:var(--bg);color:var(--muted);padding:7px 4px;cursor:pointer}
+.seg button + button{border-left:1px solid var(--rule)}
+.seg button[aria-checked="true"]{background:var(--ink);color:var(--bg)}
+.seedrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.btn{font:inherit;font-size:13.5px;font-weight:500;letter-spacing:.03em;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:7px 14px;border-radius:3px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--chip)}
+.btn.solid{background:var(--ink);color:var(--bg)}
+.btn.solid:hover{opacity:.85}
+.toggles{display:grid;gap:8px}
+.toggle{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
+.toggle input{accent-color:var(--ink);width:16px;height:16px;margin:0}
+.swatches{display:flex;gap:8px}
+.sw{width:34px;height:34px;border-radius:50%;border:1px solid var(--rule);cursor:pointer;padding:0;position:relative;overflow:hidden}
+.sw span{position:absolute;inset:26%;border-radius:50%}
+.sw[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.custom{display:flex;gap:12px;align-items:center;font-size:13px;color:var(--muted)}
+.custom label{display:flex;align-items:center;gap:6px}
+.custom input[type=color]{width:28px;height:24px;border:1px solid var(--rule);border-radius:3px;padding:0;background:none}
+
+.stagewrap{display:grid;gap:18px;min-width:0}
+.stage{background:var(--stage);border:1px solid var(--rule);border-radius:4px;padding:clamp(16px,3vw,36px);display:grid;place-items:center;min-height:360px}
+.stage svg{display:block;height:auto;box-shadow:0 0 0 1px var(--rule),0 10px 28px -14px rgba(0,0,0,.25)}
+.bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;justify-content:space-between}
+.meta{font-size:13px;color:var(--muted)}
+.meta b{font-family:var(--display);font-weight:400;font-style:italic;font-size:17px;color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+
+.vars-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.vars-head h3{font-family:var(--display);font-weight:400;font-size:22px;margin:0}
+.vars{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.thumb{background:var(--stage);border:1px solid var(--rule);border-radius:4px;padding:12px 10px 8px;cursor:pointer;display:grid;gap:6px;justify-items:center;font:inherit;color:var(--muted);font-size:12px;letter-spacing:.06em}
+.thumb:hover{border-color:#B5B5B5}
+.thumb[aria-current="true"]{border-color:var(--ink)}
+.thumb svg{display:block;height:auto;box-shadow:0 0 0 1px var(--rule)}
+
+.emb-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);padding:5px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:14px}
+.card{border:1px solid var(--rule);border-radius:4px;overflow:hidden;display:grid;grid-template-rows:auto auto;background:var(--panel)}
+.card .art{aspect-ratio:5/4;display:grid;place-items:center;padding:14px}
+.card .art svg{width:100%;height:100%;display:block}
+.card .foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 10px;padding:10px 10px 10px 12px;border-top:1px solid var(--rule)}
+.card .name{font-family:var(--display);font-style:italic;font-size:16px;line-height:1.2;white-space:nowrap}
+.card .name small{display:block;font-family:var(--ui);font-style:normal;font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.mini{display:flex;gap:4px}
+.mini button{font:inherit;font-size:12px;font-weight:500;border:1px solid var(--rule);background:transparent;color:var(--ink);padding:4px 8px;border-radius:3px;cursor:pointer}
+.mini button:hover{border-color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:3px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.only-border[hidden],.view[hidden]{display:none!important}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+</style>
+
+<div class="topline" aria-hidden="true"></div>
+<header>
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Brand motif generator</p>
+      <h1>Gate<em>work</em> Studio</h1>
+      <p class="lede">Wrought-iron borders and small embellishments, drawn as clean vectors. Rounded, tapered scrolls and flowing acanthus leaves.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Generator">
+      <button role="tab" id="tab-borders" aria-selected="true" data-view="borders">Borders</button>
+      <button role="tab" id="tab-emb" aria-selected="false" data-view="emb">Embellishments</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <aside class="panel" aria-label="Settings">
+      <section class="group only-border">
+        <h2>Border <small>Layout</small></h2>
+        <div class="field"><span class="lab">Detail</span>
+          <div class="seg" id="detail" role="radiogroup" aria-label="Detail">
+            <button type="button" role="radio" data-d="1">Simple</button><button type="button" role="radio" data-d="2">Balanced</button><button type="button" role="radio" data-d="3">Ornate</button>
+          </div></div>
+        <div class="seedrow">
+          <label class="field"><span>Design no.</span><input type="number" id="seed" min="1" max="9999"></label>
+          <button class="btn" id="shuffle" type="button">Next design</button>
+        </div>
+        <label class="field"><span>Format</span>
+          <select id="format"></select></label>
+        <label class="field"><span>Band</span>
+          <select id="pattern">
+            <option value="auto">Surprise me</option>
+            <option value="rinceau">Running scroll</option>
+            <option value="cpair">Back-to-back C scrolls</option>
+            <option value="srun">Running S scrolls</option>
+            <option value="heart">Lyre hearts</option>
+          </select></label>
+        <label class="field"><span>Centrepiece</span>
+          <select id="centre">
+            <option value="none">None</option>
+            <option value="top">Top</option>
+            <option value="topbottom">Top and bottom</option>
+            <option value="all">All four sides</option>
+          </select></label>
+        <label class="field"><span>Frame</span>
+          <select id="rail">
+            <option value="single">Rails</option>
+            <option value="double">Double rails</option>
+            <option value="none">No rails</option>
+          </select></label>
+        <label class="field"><span>Band depth <output id="band-o"></output></span><input type="range" id="band" min="0.04" max="0.11" step="0.002"></label>
+      </section>
+
+      <section class="group">
+        <h2>Finish <small>Shared</small></h2>
+        <label class="field"><span>Iron</span>
+          <select id="finish">
+            <option value="solid">Solid iron</option>
+            <option value="outline">Hollow outline</option>
+            <option value="fine">Fine line</option>
+          </select></label>
+        <label class="field"><span>Bar weight <output id="weight-o"></output></span><input type="range" id="weight" min="1" max="7" step="0.1"></label>
+        <label class="field"><span>Thick to thin <output id="contrast-o"></output></span><input type="range" id="contrast" min="0" max="1" step="0.05"></label>
+        <div class="toggles">
+          <label class="toggle"><input type="checkbox" id="welds"> Show joinery details</label>
+          <label class="toggle"><input type="checkbox" id="garden"> Acanthus leaves</label>
+        </div>
+        <div class="field"><span class="lab">Colour</span>
+          <div class="swatches" id="swatches"></div>
+          <div class="custom">
+            <label>Ink <input type="color" id="ink"></label>
+            <label>Paper <input type="color" id="paper"></label>
+          </div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="transparent"> Export without paper (transparent)</label>
+      </section>
+    </aside>
+
+    <main>
+      <section class="view stagewrap" id="view-borders" aria-labelledby="tab-borders">
+        <div class="stage" id="stage"></div>
+        <div class="bar">
+          <div class="meta" id="meta"></div>
+          <div class="actions">
+            <button class="btn" type="button" id="copy-svg">Copy SVG</button>
+            <button class="btn" type="button" id="dl-png">Download PNG</button>
+            <button class="btn solid" type="button" id="dl-svg">Download SVG</button>
+          </div>
+        </div>
+        <div class="vars-head">
+          <h3>Variations</h3>
+          <button class="btn" type="button" id="new-vars">New set of six</button>
+        </div>
+        <div class="vars" id="vars"></div>
+      </section>
+
+      <section class="view stagewrap" id="view-emb" aria-labelledby="tab-emb" hidden>
+        <div class="emb-head">
+          <div class="chips" id="chips"></div>
+          <button class="btn solid" type="button" id="new-emb">Generate another dozen</button>
+        </div>
+        <div class="grid" id="grid"></div>
+      </section>
+    </main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   Geometry kernel: forged-iron vocabulary built from spirals
+   ============================================================ */
+const TAU = Math.PI * 2, SQ = Math.SQRT1_2;
+
+function rngFrom(seed) {
+  let a = (seed >>> 0) || 1;
+  const f = () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  for (let i = 0; i < 4; i++) f();
+  return { f, range: (x, y) => x + (y - x) * f(), int: (x, y) => Math.floor(x + (y - x + 1) * f()), pick: arr => arr[Math.floor(f() * arr.length)], chance: p => f() < p };
+}
+
+// 2x3 affine matrices [a,b,c,d,e,f]: x' = a x + c y + e, y' = b x + d y + f
+const I = [1, 0, 0, 1, 0, 0];
+const Mt = (x, y) => [1, 0, 0, 1, x, y];
+const Mr = t => [Math.cos(t), Math.sin(t), -Math.sin(t), Math.cos(t), 0, 0];
+const MX = [-1, 0, 0, 1, 0, 0], MY = [1, 0, 0, -1, 0, 0], MD = [0, 1, 1, 0, 0, 0];
+const mul = (A, B) => [A[0]*B[0]+A[2]*B[1], A[1]*B[0]+A[3]*B[1], A[0]*B[2]+A[2]*B[3], A[1]*B[2]+A[3]*B[3], A[0]*B[4]+A[2]*B[5]+A[4], A[1]*B[4]+A[3]*B[5]+A[5]];
+const chain = (...ms) => ms.reduce((acc, m) => mul(m, acc), I); // applied in listed order
+const ap = (M, p) => [M[0]*p[0] + M[2]*p[1] + M[4], M[1]*p[0] + M[3]*p[1] + M[5]];
+const av = (M, v) => { const x = M[0]*v[0] + M[2]*v[1], y = M[1]*v[0] + M[3]*v[1], l = Math.hypot(x, y) || 1; return [x/l, y/l]; };
+const about = (M, c) => chain(Mt(-c[0], -c[1]), M, Mt(c[0], c[1]));
+
+// Spirals with curvature rising as a power of arc length: the shape a smith bends.
+function spiralJ(L, turns, p, n = 120) {
+  turns *= 1.2; p = .45 + p * .4; // callers speak in "tight hook" units; this opens the eye into a rounder smith's scroll
+  const K = turns * TAU * (p + 1) / L, ds = L / n, pts = [[0, 0]];
+  let x = 0, y = 0, th = 0;
+  for (let i = 0; i < n; i++) {
+    const s = (i + 0.5) * ds, k = K * Math.pow(s / L, p), tm = th + k * ds / 2;
+    x += Math.cos(tm) * ds; y += Math.sin(tm) * ds; th += k * ds; pts.push([x, y]);
+  }
+  return pts;
+}
+const spiralC = (L, t, p) => { const h = spiralJ(L/2, t, p); return h.map(([x, y]) => [-x, y]).reverse().concat(h.slice(1)); };
+const spiralS = (L, t, p) => { const h = spiralJ(L/2, t, p); return h.map(([x, y]) => [-x, -y]).reverse().concat(h.slice(1)); };
+const flipY = pts => pts.map(([x, y]) => [x, -y]);
+const tangent = (P, i) => { const a = P[Math.max(0, i-1)], b = P[Math.min(P.length-1, i+1)], l = Math.hypot(b[0]-a[0], b[1]-a[1]) || 1; return [(b[0]-a[0])/l, (b[1]-a[1])/l]; };
+const angOf = v => Math.atan2(v[1], v[0]);
+const circ = (c, r, n = 72) => Array.from({ length: n }, (_, i) => [c[0] + r * Math.cos(i / n * TAU), c[1] + r * Math.sin(i / n * TAU)]);
+
+// Shapes
+const bar = (pts, prof = 'flat', o = {}) => ({ k: 'bar', pts, prof, ...o });
+const line = (pts, o = {}) => ({ k: 'line', pts, ...o });
+const dot = (c, m = 1.3, weld = false) => ({ k: 'dot', c, m, weld });
+const disc = (c, r) => ({ k: 'disc', c, r });
+const ring = (c, r, m = 1) => ({ k: 'ring', c, r, m });
+const collar = (c, d, span, m = 1.6) => ({ k: 'collar', c, d, span, m });
+const rope = (p0, p1) => ({ k: 'rope', p0, p1 });
+
+function xf(S, M) {
+  const sc = Math.sqrt(Math.abs(M[0]*M[3] - M[1]*M[2]));
+  return S.map(s => {
+    const o = { ...s };
+    for (const key of ['pts', 'outline', 'rib']) if (s[key]) o[key] = s[key].map(p => ap(M, p));
+    if (s.c) o.c = ap(M, s.c);
+    if (s.d) o.d = av(M, s.d);
+    if (s.r != null) o.r = s.r * sc;
+    if (s.span != null) o.span = s.span * sc;
+    if (s.p0) { o.p0 = ap(M, s.p0); o.p1 = ap(M, s.p1); }
+    return o;
+  });
+}
+function bboxOf(S) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const add = (x, y) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; };
+  for (const s of S) {
+    for (const key of ['pts', 'outline']) if (s[key]) for (const p of s[key]) add(p[0], p[1]);
+    if (s.k === 'ring' || s.k === 'disc') { add(s.c[0]-s.r, s.c[1]-s.r); add(s.c[0]+s.r, s.c[1]+s.r); }
+    else if (s.c) add(s.c[0], s.c[1]);
+    if (s.p0) { add(...s.p0); add(...s.p1); }
+  }
+  return { x0, y0, x1, y1, w: x1 - x0, h: y1 - y0 };
+}
+function fitInto(S, [X0, Y0, X1, Y1], uniform = false) {
+  const b = bboxOf(S); let sx = (X1 - X0) / (b.w || 1), sy = (Y1 - Y0) / (b.h || 1);
+  if (uniform) sx = sy = Math.min(sx, sy);
+  return xf(S, [sx, 0, 0, sy, (X0+X1)/2 - (b.x0+b.x1)/2*sx, (Y0+Y1)/2 - (b.y0+b.y1)/2*sy]);
+}
+const scaleAbout = (S, [ax, ay], k) => xf(S, [k, 0, 0, k, ax - ax*k, ay - ay*k]);
+function clampTo(S, [ax, ay], box) {
+  const b = bboxOf(S); let k = 1;
+  if (b.x0 < box[0] && ax > b.x0) k = Math.min(k, (ax - box[0]) / (ax - b.x0));
+  if (b.x1 > box[2] && b.x1 > ax) k = Math.min(k, (box[2] - ax) / (b.x1 - ax));
+  if (b.y0 < box[1] && ay > b.y0) k = Math.min(k, (ay - box[1]) / (ay - b.y0));
+  if (b.y1 > box[3] && b.y1 > ay) k = Math.min(k, (box[3] - ay) / (b.y1 - ay));
+  return k < 1 ? scaleAbout(S, [ax, ay], Math.max(k, 0.1)) : S;
+}
+const ptsOf = S => S.flatMap(s => s.pts || s.outline || []);
+function nearest(A, B) {
+  let best = Infinity, ia = 0, pb = B[0];
+  for (let i = 0; i < A.length; i += 2) for (let j = 0; j < B.length; j += 2) {
+    const d = (A[i][0] - B[j][0]) ** 2 + (A[i][1] - B[j][1]) ** 2;
+    if (d < best) { best = d; ia = i; pb = B[j]; }
+  }
+  return { ia, a: A[ia], b: pb, d: Math.sqrt(best) };
+}
+// Weld two touching bars with a collar at their closest approach.
+function weldAt(A, B, w) {
+  const n = nearest(A, B);
+  return collar([(n.a[0] + n.b[0]) / 2, (n.a[1] + n.b[1]) / 2], tangent(A, n.ia), n.d + 2.4 * w);
+}
+
+// Rounded teardrop leaf: narrow at the stem, a full round end. The acanthus lobe of the references.
+function leaf(base, ang, len, wid, bend = 0) {
+  const n = 24, up = [], lo = [], rib = [], c = .5;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, x = t * len, yc = bend * len * t * t;
+    const hw = wid * .5 * (t <= c ? Math.pow(Math.sin(Math.PI / 2 * t / c), .85) : Math.sqrt(Math.max(0, 1 - ((t - c) / (1 - c)) ** 2)));
+    up.push([x, yc - hw]); lo.push([x, yc + hw]); if (t <= .7) rib.push([x, yc]);
+  }
+  const outline = up.concat(lo.slice(1, -1).reverse());
+  return xf([{ k: 'leaf', outline, rib }], chain(Mr(ang), Mt(base[0], base[1])));
+}
+// Acanthus: three rounded lobes fanning to one side and curling, the forged leaf of the references.
+// A single lobed silhouette avoids stacked teardrops merging into black knots.
+function bezier(points, steps = 28) {
+  const out = [points[0]];
+  for (let k = 1; k < points.length; k += 3) {
+    const a = points[k-1], b = points[k], c = points[k+1], d = points[k+2];
+    for (let i = 1; i <= steps; i++) {
+      const t = i/steps, u = 1-t;
+      out.push([u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*d[0], u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*d[1]]);
+    }
+  }
+  return out;
+}
+// Rounded, fleshy lobes with continuous tangents, like inked forged foliage.
+function smoothClosed(P) {
+  const out=[];
+  for(let i=0;i<P.length;i++) {
+    const a=P[(i+P.length-1)%P.length], b=P[i], c=P[(i+1)%P.length], d=P[(i+2)%P.length];
+    const seg=bezier([b,[b[0]+(c[0]-a[0])/6,b[1]+(c[1]-a[1])/6],
+      [c[0]-(d[0]-b[0])/6,c[1]-(d[1]-b[1])/6],c],12);
+    out.push(...seg.slice(0,-1));
+  }
+  return out;
+}
+function acanthus(base, ang, len, turn = 1) {
+  const outline = smoothClosed([[0,0],[.2,-.04],[.32,-.2],[.45,-.24],
+    [.47,-.12],[.59,-.16],[.72,-.34],[.89,-.33],[.92,-.24],
+    [.8,-.13],[.93,-.05],[1.02,.04],[.95,.12],[.8,.1],
+    [.68,.09],[.55,.24],[.43,.23],[.41,.12],[.24,.13],[.12,.04]]);
+  const rib = bezier([[.04,0],[.3,.015],[.55,-.02],[.83,-.1]],24);
+  return xf([{k:'leaf',outline,rib}], chain([len,0,0,len*turn,0,0], Mr(ang), Mt(...base)));
+}
+// Border foliage: one swept, rounded leaf, with an open vein instead of serrated clusters.
+function borderLeaf(base, ang, len, turn = 1) {
+  const outline = smoothClosed([[0,0],[.22,-.035],[.48,-.22],[.76,-.27],
+    [.94,-.17],[.96,-.045],[.88,.005],[.82,-.075],
+    [.65,-.08],[.47,.075],[.23,.09],[.08,.025]]);
+  const rib = bezier([[.06,.005],[.3,.02],[.57,-.13],[.81,-.13]],28);
+  return xf([{k:'leaf',outline,rib}], chain([len,0,0,len*turn,0,0], Mr(ang), Mt(...base)));
+}
+// An acanthus sprouting from the outer side of a curve at index k, leaning back along it.
+function lobe(P, k, size) {
+  k = Math.max(1, Math.min(P.length - 5, k));
+  const T = tangent(P, k), T2 = tangent(P, k + 4), turn = Math.sign(T[0] * T2[1] - T[1] * T2[0]) || 1;
+  const out = turn > 0 ? [T[1], -T[0]] : [-T[1], T[0]];
+  return borderLeaf(P[k], angOf([out[0] * .8 - T[0] * .6, out[1] * .8 - T[1] * .6]) + turn * .3, size, -turn);
+}
+// A plain volute: a spiral wound from a ball at its eye.
+function voluteMotif(c, r, R) {
+  const C = [bar(spiralC(1, R.range(.85, 1.08), 1.65), 'c', {start:'ball', end:'ball'})];
+  return fitInto(C, [c[0]-r, c[1]-r*.85, c[0]+r, c[1]+r*.85], true);
+}
+const ellipse = (c, rx, ry, n = 80) => Array.from({ length: n }, (_, i) => [c[0] + rx * Math.cos(i / n * TAU), c[1] + ry * Math.sin(i / n * TAU)]);
+
+function finial(p, d, s, w, type, R, o) {
+  const L = [];
+  if (type === 'spear') {
+    L.push(...leaf([0, 0], 0, s, s * .4), collar([s * .02, 0], [1, 0], s * .3));
+  } else if (type === 'fleur') {
+    L.push(...leaf([0, 0], 0, s, s * .18));
+    const j = xf([bar(flipY(spiralJ(s * .78, R.range(.95, 1.25), 1.7)), 'j', { end: 'ball' })], chain(Mr(-1.1), Mt(s * .1, 0)));
+    L.push(...j, ...xf(j, MY), collar([s * .1, 0], [1, 0], s * .34));
+  } else {
+    L.push(collar([0, 0], [1, 0], w * 3.6), disc([s * .3, 0], s * .24));
+  }
+  return xf(L, chain(Mr(angOf(d)), Mt(p[0], p[1])));
+}
+
+/* ---------- Band modules: drawn in a box [0,A] x [0,1]. y=0 and y=1 are the rails, and the scrolls run right up to them ---------- */
+const BAND_BOX = [-1e9, .02, 1e9, .98], ANY_BOX = [-1e9, -1e9, 1e9, 1e9];
+// Leaves that would have to shrink to fit the band are left off rather than drawn as spikes.
+function fitted(S, anchor, box = BAND_BOX) { const cl = clampTo(S, anchor, box); return bboxOf(cl).w > bboxOf(S).w * .7 ? cl : []; }
+const addLobes = (S, P, fracs, size, box = BAND_BOX) => { for (const f of fracs) { const k = Math.max(1, Math.min(P.length - 5, Math.floor(P.length * f))); S.push(...fitted(lobe(P, k, size), P[k], box)); } };
+const extremes = P => { let iMin = 0, iMax = 0; P.forEach((q, i) => { if (q[1] < P[iMin][1]) iMin = i; if (q[1] > P[iMax][1]) iMax = i; }); return [P[iMin], P[iMax]]; };
+// Weld collars where a scroll meets the rails.
+const railCollars = () => []; // Rail contacts are continuous; no decorative dash marks.
+// Grow a volute from a root point into the hollow above it, trying a fan of headings and both winding senses.
+function voluteInto(P, top, box, turns, pw) {
+  let br = null, best = -1;
+  for (const sense of [1, -1]) for (let h = .3; h <= 1.5; h += .15) {
+    let c = xf([bar(sense > 0 ? spiralJ(1, turns, pw) : flipY(spiralJ(1, turns, pw)), 'j', { end: 'ball' })], chain(Mr(-Math.PI + h), Mt(...P)));
+    const b0 = bboxOf(c); c = scaleAbout(c, P, (P[1] - top) / Math.max(1e-3, P[1] - b0.y0));
+    c = clampTo(c, P, box);
+    const b1 = bboxOf(c), score = b1.h * Math.min(b1.w, b1.h);
+    if (score > best) { best = score; br = c; }
+  }
+  return br;
+}
+
+const MODULES = {
+  rinceau(R, o) {
+    // A running scroll whose crests are collared to both rails; each hollow holds a volute that also meets the rail.
+    const A = R.range(2.8, 3.3), n = 90, stem = [];
+    for (let i = 0; i <= n; i++) { const x = A * i / n; stem.push([x, .5 + .5 * Math.sin(TAU * x / A)]); }
+    const at = x => [x, .5 + .5 * Math.sin(TAU * x / A)], ang = x => Math.atan(.5 * TAU / A * Math.cos(TAU * x / A));
+    const xs = A * R.range(.38, .43), P = at(xs), a = ang(xs);
+    const br = voluteInto(P, 0, [.05, 0, A - .05, P[1] + .04], R.range(1.05, 1.3) * o.curl, R.range(1.2, 1.7));
+    const slot = [...br, collar(P, [Math.cos(a), Math.sin(a)], 3.2 * o.wb)];
+    if (o.lobes) slot.push(...fitted(borderLeaf(P, a - .95, .58, -1), P));
+    const body = [bar(stem, 'wave'), ...slot, ...xf(slot, [-1, 0, 0, -1, A, 1]), collar([A / 4, 1], [1, 0], 2.6 * o.wb), collar([3 * A / 4, 0], [1, 0], 2.6 * o.wb)];
+    return { A, body, joint: [] };
+  },
+  cpair(R, o) {
+    const c = xf([bar(spiralC(1, R.range(.95, 1.35) * o.curl, R.range(1.5, 2.4)), 'c', { start: 'ball', end: 'ball' })], Mr(Math.PI/2));
+    const bb = bboxOf(c), half = bb.w / bb.h * R.range(.92, 1.08), gap = R.range(.08, .16), A = 2 * (half + gap);
+    let left = fitInto(c, [gap, 0, A/2, 1]);
+    left = [...left, ...railCollars(left[0].pts, o)];
+    const body = [...left, ...xf(left, [-1, 0, 0, 1, A, 0]), collar([A/2, .5], [0, 1], 3.6 * o.wb)];
+    const joint = o.lobes ? [...borderLeaf([0, .5], -Math.PI / 2 - .44, .3), ...borderLeaf([0, .5], Math.PI / 2 - .44, .3), dot([0, .5], 1.3)] : o.detail > 1 ? [dot([0, .5], 1.6)] : [];
+    return { A, body, joint };
+  },
+  srun(R, o) {
+    const s0 = xf([bar(spiralS(1, R.range(.95, 1.3) * o.curl, R.range(1.5, 2.3)), 'c', { start: 'ball', end: 'ball' })], Mr(-R.range(.25, .55)));
+    const bb = bboxOf(s0), nat = bb.w / bb.h, gap = R.range(.02, .07), alt = R.chance(.5) && nat < 2.25;
+    const A = alt ? 2 * (nat + 2 * gap) : nat + 2 * gap;
+    let one = fitInto(s0, [gap, 0, gap + nat, 1]);
+    const P = one[0].pts;
+    one = [...one, ...railCollars(P, o)];
+    if (o.lobes) addLobes(one, P, [.32, .68], .26);
+    const body = alt ? [...one, ...xf(one, [-1, 0, 0, 1, A, 0])] : one;
+    return { A, body, joint: [] };
+  },
+  heart(R, o) {
+    const inward = R.chance(.5), splay = R.range(.08, .28);
+    let j = xf([bar(spiralJ(1, R.range(.85, 1.25) * o.curl, R.range(1.4, 2.2)), 'j', { end: 'ball' })], Mr(-Math.PI/2));
+    if (inward) j = xf(j, MX);
+    j = xf(j, Mr(inward ? splay * 1.7 : splay));
+    const pair = [...j, ...xf(j, MX)], stem = R.range(.16, .26), bb = bboxOf(pair), s = (1 - stem) / bb.h, gap = R.range(.04, .1);
+    const A = bb.w * s + 2 * gap, baseY = -s * bb.y0;
+    const placed = xf(j, [s, 0, 0, s, A/2, baseY]), top = extremes(placed[0].pts)[0];
+    const half = [...placed, collar(top, [1, 0], 2.6 * o.wb)];
+    if (o.lobes) half.push(...fitted(borderLeaf([A/2, baseY + .02], -Math.PI / 2 + .55, .3, 1), [A/2, baseY]));
+    let body = [...half, ...xf(half, [-1, 0, 0, 1, A, 0]), bar([[A/2, baseY], [A/2, 1]]), collar([A/2, baseY + .07], [0, 1], 3.4 * o.wb), collar([A/2, 1], [1, 0], 2.6 * o.wb)];
+    if (R.chance(.5)) body = xf(body, [1, 0, 0, -1, 0, 1]);
+    return { A, body, joint: o.detail === 1 ? [] : [line([[0, 0], [0, 1]])] };
+  },
+};
+
+function cornerBlock(type, R, o) { // unit square, (0,0) = outer corner; pieces meet all four sides
+  switch (type) {
+    case 'knot': {
+      const c = [bar(spiralC(1, R.range(1, 1.3) * o.curl, 1.8), 'c', { start: 'ball', end: 'ball' })], bb = bboxOf(c), s = Math.min(.4 / bb.w, .32 / bb.h);
+      const one = xf(c, [s, 0, 0, s, .5 - s * (bb.x0 + bb.x1) / 2, .54 - s * bb.y0]), S = [dot([.5, .5], 1.8)];
+      for (let k = 0; k < 4; k++) S.push(...xf(one, about(Mr(k * Math.PI / 2), [.5, .5])));
+      return fitInto(S, [0, 0, 1, 1], true);
+    }
+    case 'palmette': {
+      const j = xf([bar(spiralJ(.48, R.range(1, 1.25) * o.curl, 1.8), 'j', { end: 'ball' })], chain(Mr(-3 * Math.PI / 4 + R.range(.3, .45)), Mt(.74, .74)));
+      const S = [...j, ...xf(j, MD), ...leaf([.74, .74], -3 * Math.PI / 4, .46, .2), collar([.7, .7], [-SQ, -SQ], 4.2 * o.wb)];
+      return fitInto(S, [0, 0, 1, 1], true);
+    }
+    case 'volute': return [line(circ([.5, .5], .5), { closed: true }), ...xf(voluteMotif([.5, .5], .34, R), about(Mr(-Math.PI/4), [.5,.5]))];
+    default: return [line(circ([.5, .5], .5), { closed: true }), ...[[.1, .1], [.9, .1], [.9, .9], [.1, .9]].map(p => dot(p, 1.4, true)), line(circ([.5, .5], .2), { closed: true }), dot([.5, .5], 1.4)];
+  }
+}
+
+/* ---------- Centrepiece: sits inside the band, centred on an edge, touching both rails. Unit coords, height 1 ---------- */
+function centrePiece(R, o) {
+  const mid = [], half = [], cy = .5;
+  if (R.chance(.5)) mid.push(line(ellipse([0, cy], .3, .5), { closed: true }), ...voluteMotif([0, cy], .22, R));
+  else mid.push(...finial([0, 1], [0, -1], 1, o.wb, 'fleur', R, o));
+  const c0 = bboxOf(mid).x1 + .02;
+  let s = xf([bar(spiralS(1, R.range(1.05, 1.35) * o.curl, R.range(1.4, 2)), 'c', { start: 'ball', end: 'ball' })], Mr(R.range(.5, .8)));
+  if (R.chance(.5)) s = xf(s, MY);
+  let bb = bboxOf(s); const sc = 1 / bb.h;
+  s = xf(s, [sc, 0, 0, sc, c0 - sc * bb.x0, -sc * bb.y0]);
+  const nr = nearest(s[0].pts, ptsOf(mid));
+  s = xf(s, Mt(-Math.max(0, nr.d - 1.4 * o.wb), 0));
+  half.push(...s, weldAt(s[0].pts, ptsOf(mid), o.wb), ...railCollars(s[0].pts, o));
+  if (o.lobes) addLobes(half, s[0].pts, [.3, .7], .26);
+  if (o.detail === 3) {
+    let c = xf([bar(spiralC(1, R.range(1, 1.3) * o.curl, 1.8), 'c', { start: 'ball', end: 'ball' })], Mr(-Math.PI / 2));
+    bb = bboxOf(c); const k = 1 / bb.h, x0 = bboxOf(s).x1 + .03;
+    c = xf(c, [k, 0, 0, k, x0 - k * bb.x0, -k * bb.y0]);
+    half.push(...c, weldAt(c[0].pts, s[0].pts, o.wb));
+  }
+  const Wc = 2 * (bboxOf(half).x1 + .06);
+  return { Wc, body: [...mid, ...half, ...xf(half, MX)] };
+}
+
+/* ---------- Crest: the base of the finial embellishment ---------- */
+function crest(R, Hc, w, o) {
+  const g = w * 1.9, half = [], mid = [];
+  const stemH = Hc * R.range(.5, .75);
+  mid.push(dot([0, g * .6], 1.9));
+  const L = Hc * R.range(1.05, 1.5);
+  half.push(...xf([bar(spiralJ(L, R.range(1, 1.35) * o.curl, R.range(1.5, 2.4)), 'j', { end: 'ball' })], Mt(w * 1.7, g)), collar([w * 1.7 + L * .1, g / 2], [1, 0], g + 2.4 * w));
+  if (R.chance(.7)) {
+    const hc = Hc * R.range(.26, .4), yc = stemH * R.range(.35, .55);
+    const c = xf([bar(spiralC(1, R.range(.9, 1.25) * o.curl, R.range(1.5, 2.2)), 'c', { start: 'ball', end: 'ball' })], Mr(-Math.PI/2));
+    const bb = bboxOf(c), s = hc / bb.h;
+    half.push(...xf(c, [s, 0, 0, s, w * 1.5 - s * bb.x0, yc - s * (bb.y0 + bb.y1) / 2]));
+    mid.push(collar([0, yc], [0, 1], 5.6 * w));
+  }
+  return [...mid, ...half, ...xf(half, MX)];
+}
+
+/* ---------- Border assembly ---------- */
+const FORMATS = {
+  letter: { w: 850, h: 1100, label: 'Letterhead, 8.5 × 11' },
+  card: { w: 1050, h: 750, label: 'Note card, 7 × 5' },
+  square: { w: 1080, h: 1080, label: 'Square post, 1:1' },
+  biz: { w: 1050, h: 600, label: 'Business card, 3.5 × 2' },
+  story: { w: 1080, h: 1920, label: 'Story, 9:16' },
+};
+const PATTERN_NAMES = { rinceau: 'Running scroll', cpair: 'Back-to-back C scrolls', srun: 'Running S scrolls', heart: 'Lyre hearts' };
+const CORNER_NAMES = { knot: 'scroll knot corners', palmette: 'palmette corners', volute: 'volute corners', plate: 'rivet plate corners' };
+
+function edgesFor(W, H, m, b) {
+  const lw = W - 2*m - 2*b, lh = H - 2*m - 2*b;
+  return [
+    { M: [1, 0, 0, 1, m + b, m], len: lw },
+    { M: [0, 1, -1, 0, W - m, m + b], len: lh },
+    { M: [-1, 0, 0, -1, W - m - b, H - m], len: lw },
+    { M: [0, -1, 1, 0, m, H - m - b], len: lh },
+  ];
+}
+
+// Reference study: repeat a master motif at a uniform scale; fit the spaces between motifs.
+// Historic references and the audit rationale are recorded in the accompanying research brief.
+function buildBorder(st, seed) {
+  const { w: W, h: H } = FORMATS[st.format], mn = Math.min(W, H);
+  const w = st.weight * mn / 1000, m = Math.round(mn * .06), D = st.detail;
+  const RA = rngFrom(seed * 9 + 11);
+  const autoPattern = RA.pick(D === 1 ? ['rinceau', 'cpair', 'srun'] : ['rinceau', 'rinceau', 'cpair', 'srun', 'heart']);
+  const cornerType = RA.pick(['knot', 'palmette', 'volute', 'plate']);
+  const pattern = st.pattern === 'auto' ? autoPattern : st.pattern;
+  const b = st.band * mn, rails = st.rail !== 'none';
+  const o = { curl: st.curl, garden: st.garden, detail: D, lobes: st.garden && D > 1, wb: w / b };
+  const pad = rails ? w * (st.finish === 'outline' ? 2.2 : st.finish === 'fine' ? .6 : 1.1) / 2 : 0;
+  const S = [], rect = i => [[i, i], [W - i, i], [W - i, H - i], [i, H - i]];
+  if (rails) S.push(line(rect(m), { closed: true }), line(rect(m + b), { closed: true }));
+  if (st.rail === 'double') S.push(line(rect(m - 3.4 * w), { closed: true, m: .6 }), line(rect(m + b + 3.4 * w), { closed: true, m: .6 }));
+  const E = edgesFor(W, H, m, b);
+  const tpl = MODULES[pattern](rngFrom(seed * 31 + 7), o);
+  const blk = cornerBlock(cornerType, rngFrom(seed * 5 + 3), o);
+  const cp = centrePiece(rngFrom(seed * 23 + 9), o);
+  const centreEdges = { none: [], top: [0], topbottom: [0, 2], all: [0, 1, 2, 3] }[st.centre];
+  // A single scale for all four sides prevents circles becoming different ellipses.
+  const scale = Math.min(b - 2*pad, ...E.map((e,ei) => e.len / (2*tpl.A + (centreEdges.includes(ei) ? cp.Wc : 0) + .4)));
+  const y = (b-scale)/2, cell = tpl.A*scale, layout = [];
+  const cornerFrames = [[1,0,0,1,m,m],[-1,0,0,1,W-m,m],[-1,0,0,-1,W-m,H-m],[1,0,0,-1,m,H-m]];
+  const withTies = body => {
+    body = body.map(s => s.k === 'collar' ? {...s, span: Math.max(s.span, w*2.4)} : s);
+    if (!rails) return body;
+    const P = body.filter(s => s.k==='bar' || s.k==='line').flatMap(s=>s.pts || []);
+    if (!P.length) return body;
+    const minY=Math.min(...P.map(p=>p[1])), maxY=Math.max(...P.map(p=>p[1]));
+    const ties=[],seen=new Set();
+    for (const [height,railY] of [[minY,0],[maxY,b]]) {
+      if (Math.abs(height-railY)<w*.15) continue;
+      for (const q of P) if(Math.abs(q[1]-height)<.0001) {
+        const key=q[0].toFixed(3)+':'+railY;
+        if(!seen.has(key)){seen.add(key);ties.push(line([[q[0],railY],q],{m:.65}));}
+      }
+    }
+    return [...ties,...body];
+  };
+  E.forEach((e,ei) => {
+    S.push(...xf(blk,mul(cornerFrames[ei],[b-2*pad,0,0,b-2*pad,pad,pad])));
+    if (rails) S.push(...xf([line([[0,0],[0,b]]),line([[e.len,0],[e.len,b]])],e.M));
+    const hasC=centreEdges.includes(ei), centreWidth=(hasC?cp.Wc:0)*scale + .4*scale;
+    const run=(e.len-centreWidth)/2, n=Math.max(1,Math.floor((run+1e-7)/cell));
+    const gap=Math.max(0,(run-n*cell)/(n+1));
+    const local=[], left=[], starts=[];
+    for(let i=0;i<n;i++){
+      const x=(i+1)*gap+i*cell; starts.push(x);
+      left.push(...withTies(xf(tpl.body,[scale,0,0,scale,x,y])));
+    }
+    // Only the running vine has open stem ports. Other repeats are joined by the rails.
+    if(pattern==='rinceau') {
+      const cy=b/2, slope=Math.PI/tpl.A;
+      const bridge=(x0,x1,initial=false)=>{
+        if(x1-x0<1e-6)return;
+        const h=Math.min((x1-x0)*.32,scale*.18);
+        left.push(bar(bezier([[x0,cy],[x0+h,cy+(initial?0:h*slope)],
+          [x1-h,cy-h*slope],[x1,cy]],24),'wave'));
+      };
+      bridge(0,starts[0],true);
+      for(let i=1;i<n;i++) bridge(starts[i-1]+cell,starts[i]);
+      const end=starts[n-1]+cell;
+      if(hasC) {
+        const mid=xf(cp.body,[scale,0,0,scale,e.len/2,y]);
+        const candidates=mid.filter(s=>s.pts).flatMap(s=>s.pts.map((p,i)=>({p,d:tangent(s.pts,i)})));
+        const port=candidates.reduce((a,c)=>c.p[0]<a.p[0]?c:a);
+        const h=Math.min(Math.max(0,port.p[0]-end)*.35,scale*.3);
+        left.push(bar(bezier([[end,cy],[end+h,cy+h*slope],
+          [port.p[0]-h,port.p[1]],port.p],28),'wave'),collar(port.p,port.d,2.4*w,1.2));
+      } else {
+        const right=e.len-end,h=Math.min((right-end)*.32,scale*.18);
+        local.push(bar(bezier([[end,cy],[end+h,cy+h*slope],
+          [right-h,cy+h*slope],[right,cy]],32),'wave'));
+      }
+    }
+    local.push(...left,...xf(left,[-1,0,0,1,e.len,0]));
+    if(hasC) local.push(...withTies(xf(cp.body,[scale,0,0,scale,e.len/2,y])));
+    S.push(...xf(local,e.M));
+    layout.push({edge:ei,scale,n,gap,cell,hasC,stretchX:1,stretchY:1});
+  });
+  return {S,W,H,w,pattern,cornerType,layout};
+}
+
+/* ---------- Embellishments ---------- */
+// One side of a frieze after the references: a stem whose half-waves shrink outward, each hollow holding a volute,
+// acanthus at every branch, and a small curl to finish.
+function friezeSide(R, o, w, x0, a0, lam0, K, ratio) {
+  const S = [];
+  let x = x0, L = lam0, a = a0;
+  const curl = Math.max(.75, Math.min(1.3, o.curl));
+  for (let k=0; k<K; k++) {
+    const y = 0;
+    const stem = bezier([[x,y],[x+L*.18,y],[x+L*.28,a*.35],[x+L*.5,a*.35], [x+L*.72,a*.35],[x+L*.82,y],[x+L,y]],36);
+    S.push(bar(stem,'c'));
+    const root = stem[5];
+    const scroll = bezier([root,
+      [x+L*.31,-a*.5],[x+L*.43,-a*1.15],[x+L*.72,-a],
+      [x+L*1.02,-a*.85],[x+L*.95,a*.03],[x+L*.7,-a*.05],
+      [x+L*.49,-a*.1],[x+L*.58,-a*.68],[x+L*(.69+.035*curl),-a*.46]],28);
+    S.push(bar(scroll,'j',{end:'ball'}));
+    if (k < 2) {
+      const lower = scaleAbout(xf([bar(scroll,'j',{end:'ball'})], [1,0,0,-1,0,2*root[1]]), root, .72);
+      S.push(...lower);
+    }
+    if (o.garden) {
+      const q = scroll[13];
+      S.push(...acanthus(q, -.6, a*1.3, -1));
+      if (k<2) S.push(...acanthus(stem[25], -2.5, a*1.1, 1));
+    }
+    S.push(collar(root,tangent(stem,5),2.6*w,1.25));
+    x += L; L *= ratio; a *= ratio;
+  }
+  return S;
+}
+
+const EMB = {
+  frieze: { name: 'Frieze', make(R, w, o) {
+    const mid = [], a0 = R.range(34, 42);
+    let x0;
+    if (R.chance(.55)) {
+      // An oval volute with a small crown of curls, as at the centre of the blue reference.
+      const rx = a0 * .85, ry = a0 * 1.15;
+      mid.push(line(ellipse([0, 0], rx, ry), { closed: true }), ...voluteMotif([0, 0], a0 * .62, R));
+      const cj = xf([bar(spiralJ(a0 * .9, 1.1 * o.curl, 1.7), 'j', { end: 'ball' })], chain(Mr(-Math.PI / 2 + .55), Mt(0, -ry)));
+      mid.push(...cj, ...xf(cj, MX), collar([0, -ry], [0, 1], 3.6 * w));
+      x0 = rx;
+    } else {
+      // Open tulip crest: curved forged petals with clear space around the centre.
+      const petal = bezier([[0,a0*.72], [a0*.6,a0*.65],[a0*.95,-a0*.15],[a0*.72,-a0*.8],
+        [a0*.59,-a0*1.17],[a0*.31,-a0*.92],[a0*.4,-a0*.58]],32);
+      const side = [bar(petal,'c',{end:'ball'})];
+      mid.push(...side, ...xf(side, MX), ...leaf([0,a0*.45],-Math.PI/2,a0*1.5,a0*.3),
+        collar([0,a0*.66],[0,1],3*w));
+      x0 = a0*.72;
+    }
+    const half = friezeSide(R, o, w, x0, a0, R.range(88, 104), 3, R.range(.72, .8));
+    half.push(weldAt(half[0].pts, ptsOf(mid), w));
+    return [...mid, ...half, ...xf(half, MX)];
+  }},
+  divider: { name: 'Divider', make(R, w, o) {
+    const S = [], half = [], ct = R.pick(['volute', 'lyre', 'bud']);
+    let c0;
+    if (ct === 'volute') { S.push(line(circ([0, 0], 15), { closed: true }), ...voluteMotif([0, 0], 10, R)); c0 = 16; }
+    else if (ct === 'bud') { S.push(...leaf([0, 0], -Math.PI/2, 26, 14), ...leaf([0, 0], Math.PI/2, 26, 14), dot([0, 0], 1.6)); c0 = 8; }
+    else {
+      const u = xf([bar(spiralJ(40, R.range(.9, 1.2) * o.curl, 1.8), 'j', { end: 'ball' })], chain(Mr(-Math.PI/2 + .3), Mt(2, -2)));
+      S.push(...u, ...xf(u, MX), ...xf(u, MY), ...xf(u, [-1, 0, 0, -1, 0, 0]), collar([0, 0], [0, 1], 6 * w));
+      c0 = bboxOf(u).x1 + 2;
+    }
+    const X = R.range(175, 225), sl = R.range(88, 120), sx = c0 + R.range(8, 18) + sl / 2;
+    half.push(bar([[c0, 0], [X, 0]], 'j'));
+    const s = fitInto(xf([bar(spiralS(1, R.range(.95, 1.3) * o.curl, R.range(1.4, 2.2)), 'c', { start: 'ball', end: 'ball' })], Mr(-R.range(.15, .45))), [sx - sl/2, -sl * .38, sx + sl/2, sl * .38], true);
+    half.push(...s, collar([sx, 0], [1, 0], 4 * w));
+    if (R.chance(.5)) half.push(dot([X, 0], 2.2));
+    else half.push(...xf([bar(spiralJ(40, 1.2 * o.curl, 1.8), 'j', { end: 'ball' })], Mt(X, 0)));
+    if (o.garden) addLobes(half, s[0].pts, [.3, .7], 26, ANY_BOX);
+    return [...S, ...half, ...xf(half, MX)];
+  }},
+  finial: { name: 'Finial', make(R, w, o) {
+    const H = R.range(170, 230), S = [bar([[0, 0], [0, -H]])];
+    S.push(...finial([0, -H], [0, -1], R.range(42, 56), w, R.pick(['spear', 'fleur', 'ball']), R, o));
+    S.push(...xf(crest(R, R.range(55, 75), w, o), MY), collar([0, -H * R.range(.45, .6)], [0, 1], 3.6 * w));
+    if (R.chance(.6)) S.push(disc([0, 8], 6.5));
+    if (o.garden) { const y = -H * R.range(.62, .75); S.push(...acanthus([0, y], -Math.PI / 2 + .5, 36, 1), ...xf(acanthus([0, y], -Math.PI / 2 + .5, 36, 1), MX)); }
+    return S;
+  }},
+};
+const EMB_ORDER = ['frieze', 'divider', 'finial'];
+
+/* ============================================================
+   Renderer: shapes -> SVG markup
+   Solid: filled iron with round ends. Outline: the same iron, hollowed with a mask so overlaps merge cleanly.
+   ============================================================ */
+// Width along a bar, scaled by k (0 = even bar, 1 = full swell). j: heavy root thinning into the curl; c: slender waist and fuller shoulders,
+// thin at both curls; jr: thin eye growing outward; wave: a running stem, thick between crests and pinched where it is welded.
+const PROF = {
+  j: (t, k) => 1 + k * (.42 * Math.cos(Math.PI*t) + .55 * Math.sin(Math.PI*t)**2 - .2),
+  c: (t, k) => 1 + k * (.85 * Math.sin(2*Math.PI*t)**2 - .55),
+  jr: (t, k) => 1 + k * (-.42 * Math.cos(Math.PI*t) + .55 * Math.sin(Math.PI*t)**2 - .2),
+  wave: (t, k) => 1 + k * (.7 * Math.sin(2*Math.PI*t)**2 - .4),
+  flat: () => 1,
+};
+function decimate(P, tol) {
+  if (P.length < 3) return P;
+  const out = [P[0]];
+  for (let i = 1; i < P.length - 1; i++) { const l = out[out.length - 1]; if (Math.hypot(P[i][0] - l[0], P[i][1] - l[1]) >= tol) out.push(P[i]); }
+  out.push(P[P.length - 1]); return out;
+}
+let maskSeq = 0;
+function render(S, vb, ink, paper, opt) {
+  const { finish = 'solid', welds, tol = .2, prec = 2, transparent = false, contrast = .7 } = opt;
+  const outline = finish === 'outline', forged = finish !== 'fine';
+  const w = opt.w * (outline ? 1.8 : finish === 'fine' ? .55 : 1), T = opt.w * .8;
+  const f = p => p[0].toFixed(prec) + ' ' + p[1].toFixed(prec);
+  const strokes = new Map(), fills = [], eo = [];
+  const addStroke = (d, width) => { const k = width.toFixed(2); strokes.set(k, (strokes.get(k) || '') + d); };
+  const polyD = (P, closed) => 'M' + P.map(f).join('L') + (closed ? 'Z' : '');
+  const circD = (c, r) => `M${(c[0] - r).toFixed(prec)} ${c[1].toFixed(prec)}a${r.toFixed(2)} ${r.toFixed(2)} 0 1 0 ${(2 * r).toFixed(2)} 0a${r.toFixed(2)} ${r.toFixed(2)} 0 1 0 ${(-2 * r).toFixed(2)} 0Z`;
+  const ribbon = (P, wf) => {
+    const n = P.length, cum = [0];
+    for (let i = 1; i < n; i++) cum[i] = cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]);
+    const tot = cum[n - 1] || 1, L = [], Rr = [];
+    for (let i = 0; i < n; i++) {
+      const [tx, ty] = tangent(P, i), hw = wf(cum[i] / tot) / 2;
+      L.push([P[i][0] - ty * hw, P[i][1] + tx * hw]); Rr.push([P[i][0] + ty * hw, P[i][1] - tx * hw]);
+    }
+    return 'M' + L.map(f).join('L') + 'L' + Rr.reverse().map(f).join('L') + 'Z';
+  };
+  for (const s of S) {
+    switch (s.k) {
+      case 'line': addStroke(polyD(decimate(s.pts, tol), s.closed), w * (s.m || 1)); break;
+      case 'bar': {
+        const P = s.pts, pf = PROF[s.prof] || PROF.flat, prof = t => pf(t, contrast), ball = w * (forged ? .48 : .55);
+        if (forged && s.prof !== 'flat') {
+          fills.push(ribbon(P, t => w * prof(t)));
+          fills.push(circD(P[0], s.start === 'ball' ? ball : w * prof(0) / 2), circD(P[P.length - 1], s.end === 'ball' ? ball : w * prof(1) / 2));
+        } else {
+          addStroke(polyD(P), w * (s.m || 1));
+          if (s.end === 'ball') fills.push(circD(P[P.length - 1], ball));
+          if (s.start === 'ball') fills.push(circD(P[0], ball));
+        }
+        break;
+      }
+      case 'leaf': {
+        const O = s.outline;
+        if (forged) eo.push(polyD(O, true) + (outline ? '' : ribbon(decimate(s.rib, tol * .6), t => w * (.4 - .25 * t))));
+        else { addStroke(polyD(O, true), w); addStroke(polyD(s.rib), w * .8); }
+        break;
+      }
+      case 'dot': if (!s.weld || welds) fills.push(circD(s.c, w * s.m * (forged ? 1 : 1.4))); break;
+      case 'disc': fills.push(circD(s.c, s.r)); break;
+      case 'ring': addStroke(circD(s.c, s.r), w * (s.m || 1)); break;
+      case 'collar': {
+        if (!welds) break;
+        const d = s.d, nx = -d[1], ny = d[0], hc = Math.min(w * .65, s.span * .25), c = s.c;
+        addStroke(polyD([[c[0] - nx * hc, c[1] - ny * hc], [c[0] + nx * hc, c[1] + ny * hc]]), w * .55);
+        break;
+      }
+      case 'rope': {
+        const [x0, y0] = s.p0, [x1, y1] = s.p1, len = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / len, uy = (y1 - y0) / len;
+        const lam = w * 4.6, amp = w * .7, n = Math.ceil(len / lam * 10);
+        for (const ph of [0, Math.PI]) {
+          const P = [];
+          for (let i = 0; i <= n; i++) { const t = i / n * len, o = amp * Math.sin(TAU * t / lam + ph); P.push([x0 + ux * t - uy * o, y0 + uy * t + ux * o]); }
+          addStroke(polyD(P), w * .7);
+        }
+        break;
+      }
+    }
+  }
+  const [vx, vy, vw, vh] = vb, box = `x="${vx.toFixed(1)}" y="${vy.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}"`;
+  const strokeG = (col, add) => `<g fill="none" stroke="${col}" stroke-linecap="round" stroke-linejoin="round">` + [...strokes].map(([k, d]) => `<path stroke-width="${(+k + add).toFixed(2)}" d="${d}"/>`).join('') + '</g>';
+  const fillG = (col, sw) => `<g fill="${col}"${sw ? ` stroke="${col}" stroke-width="${sw.toFixed(2)}" stroke-linejoin="round"` : ''}>` + fills.map(d => `<path d="${d}"/>`).join('') + eo.map(d => `<path fill-rule="evenodd" d="${d}"/>`).join('') + '</g>';
+  let out = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" width="${Math.round(opt.pw || vw)}" height="${Math.round(opt.ph || vh)}">`;
+  if (!transparent) out += `<rect ${box} fill="${paper}"/>`;
+  if (outline) {
+    const id = 'gwh' + (++maskSeq);
+    out += `<mask id="${id}" maskUnits="userSpaceOnUse" ${box}><rect ${box} fill="#fff"/>${strokeG('#000', 0)}${fillG('#000', 0)}</mask>`;
+    out += `<g mask="url(#${id})">${strokeG(ink, T)}${fillG(ink, T)}</g>`;
+  } else out += strokeG(ink, 0) + fillG(ink, forged ? w*.12 : 0);
+  return out + '</svg>';
+}
+
+/* ============================================================
+   App state and UI
+   ============================================================ */
+const PALETTES = [
+  { id: 'bw', name: 'Black on white', ink: '#000000', paper: '#FFFFFF' },
+  { id: 'wb', name: 'White on black', ink: '#FFFFFF', paper: '#000000' },
+];
+const DEFAULTS = { seed: 1847, format: 'letter', pattern: 'auto', centre: 'topbottom', rail: 'single', band: .07,
+  detail: 2, finish: 'solid', weight: 4, contrast: .8, curl: 1, welds: false, garden: true, ink: '#000000', paper: '#FFFFFF', transparent: false,
+  varSeed: 7, embSeed: 3, embType: 'all', view: 'borders' };
+const STORE = 'gatework-v3';
+let st = { ...DEFAULTS };
+try { const saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (saved) st = { ...DEFAULTS, ...saved }; } catch (e) {}
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify(st)); } catch (e) {} };
+const $ = s => document.querySelector(s);
+const hashSeed = (a, b) => { let h = Math.imul(a ^ 0x9E3779B9, 0x85EBCA6B) ^ Math.imul(b + 1, 0xC2B2AE35); h ^= h >>> 13; return (Math.abs(h) % 9999) + 1; };
+
+// Public design numbers are sequential; private seeds preserve existing artwork.
+if (!st.catalogue) {
+  st.catalogue = Array.from({length:6}, (_,k) => hashSeed(st.varSeed,k));
+  if (!st.catalogue.includes(st.seed)) st.catalogue.unshift(st.seed);
+  st.patternNo = st.catalogue.indexOf(st.seed)+1;
+  st.varStart = 0; st.embStart = 0; st.curl = 1; st.welds = false;
+}
+st.curl = 1;
+const ensureDesign = n => {
+  while(st.catalogue.length<n) st.catalogue.push(hashSeed(317,st.catalogue.length));
+  return st.catalogue[n-1];
+};
+const selectDesign = n => { st.patternNo=n; st.seed=ensureDesign(n); };
+
+const borderSVG = (seed, opt = {}) => {
+  const B = buildBorder(st, seed);
+  return { B, svg: render(B.S, [0, 0, B.W, B.H], st.ink, st.paper, { w: B.w, finish: st.finish, welds: st.welds, contrast: st.contrast, ...opt }) };
+};
+function embSVG(type, seed, opt = {}) {
+  const R = rngFrom(seed * 101 + EMB_ORDER.indexOf(type) * 7919), w = st.weight * 1.1;
+  const S = EMB[type].make(R, w, { curl: st.curl, garden: st.garden, detail: 3, lobes: st.garden, wb: w });
+  const b = bboxOf(S), pad = Math.max(b.w, b.h) * .08 + w * 4;
+  return render(S, [b.x0 - pad, b.y0 - pad, b.w + 2 * pad, b.h + 2 * pad], st.ink, st.paper, { w, finish: st.finish, welds: st.welds, contrast: st.contrast, prec: 2, tol: .4, ...opt });
+}
+
+function renderBorder() {
+  const F = FORMATS[st.format], ratio = F.w / F.h;
+  const { B, svg } = borderSVG(st.seed);
+  const stage = $('#stage'); stage.innerHTML = svg;
+  stage.firstElementChild.style.width = `min(100%, calc(76vh * ${ratio.toFixed(4)}), ${Math.round(F.w)}px)`;
+  stage.firstElementChild.setAttribute('role', 'img');
+  stage.firstElementChild.setAttribute('aria-label', `Border number ${st.patternNo}`);
+  $('#meta').innerHTML = `<b>No. ${st.patternNo}</b> &nbsp;${PATTERN_NAMES[B.pattern]} · ${CORNER_NAMES[B.cornerType]} · ${F.label}`;
+  renderVars();
+}
+function renderVars() {
+  const F = FORMATS[st.format], ratio = F.w / F.h, box = $('#vars');
+  box.innerHTML = '';
+  for (let k = 0; k < 6; k++) {
+    const number = st.varStart+k+1, seed = ensureDesign(number), btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'thumb'; btn.setAttribute('aria-current', String(seed === st.seed));
+    btn.setAttribute('aria-label', `Use variation number ${number}`);
+    btn.innerHTML = borderSVG(seed, { tol: .4 }).svg + `<span>No. ${number}</span>`;
+    btn.firstElementChild.style.width = `min(100%, calc(220px * ${ratio.toFixed(4)}))`;
+    btn.addEventListener('click', () => { selectDesign(number); syncInputs(); update(); });
+    box.appendChild(btn);
+  }
+}
+function renderEmb() {
+  const grid = $('#grid'); grid.innerHTML = '';
+  const types = st.embType === 'all' ? EMB_ORDER : [st.embType];
+  for (let i = 0; i < 12; i++) {
+    const number = st.embStart+i+1, type = types[i % types.length], seed = hashSeed(3 * 31 + number-1, number-1);
+    const card = document.createElement('article'); card.className = 'card';
+    card.innerHTML = `<div class="art" style="background:${st.paper}">${embSVG(type, seed, { transparent: true })}</div>
+      <div class="foot"><div class="name">${EMB[type].name}<small>No. ${number}</small></div>
+      <div class="mini"><button type="button" data-a="copy">Copy</button><button type="button" data-a="png">PNG</button><button type="button" data-a="svg">SVG</button></div></div>`;
+    const art = card.querySelector('svg'); art.setAttribute('role', 'img'); art.setAttribute('aria-label', `${EMB[type].name} number ${number}`);
+    art.removeAttribute('width'); art.removeAttribute('height');
+    card.querySelector('.mini').addEventListener('click', e => {
+      const a = e.target.dataset.a; if (!a) return;
+      const name = `gatework-${type}-${number}`, svg = embSVG(type, seed, { transparent: st.transparent });
+      if (a === 'copy') copyText(svg); else if (a === 'svg') saveFile(name + '.svg', svg); else exportPNG(svg, name + '.png', 1800);
+    });
+    grid.appendChild(card);
+  }
+}
+
+/* ---------- Export ---------- */
+const toast = msg => { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 2600); };
+const dlReady = (async () => { try { return window.claude?.use ? await window.claude.use('downloads') : undefined; } catch (e) { return null; } })();
+async function saveFile(filename, data) {
+  const dl = await dlReady;
+  if (dl) {
+    try { await dl.save({ filename, data }); toast(`Saved ${filename}`); }
+    catch (e) { if (e?.code === 'declined') return; toast(e?.code === 'rate_limited' ? 'A save is already waiting for you. Try again in a moment.' : 'Downloads are not available here. Use Copy SVG instead.'); }
+  } else if (dl === undefined) {
+    const blob = data instanceof Blob ? data : new Blob([data], { type: 'image/svg+xml' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast(`Saved ${filename}`);
+  } else toast('Downloads are not available here. Use Copy SVG instead.');
+}
+async function exportPNG(svg, filename, longSide) {
+  const m = svg.match(/width="(\d+)" height="(\d+)"/), w0 = +m[1], h0 = +m[2], k = longSide / Math.max(w0, h0);
+  const img = new Image(), url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  try {
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const cv = document.createElement('canvas'); cv.width = Math.round(w0 * k); cv.height = Math.round(h0 * k);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    await saveFile(filename, blob);
+  } catch (e) { toast('The PNG could not be drawn. Download the SVG instead.'); }
+  finally { URL.revokeObjectURL(url); }
+}
+function copyText(text) {
+  if (!navigator.clipboard) { toast('Copying is blocked here. Use Download SVG.'); return; }
+  navigator.clipboard.writeText(text).then(() => toast('SVG copied. Paste it straight into Figma or Illustrator.'), () => toast('Copying is blocked here. Use Download SVG.'));
+}
+const currentBorderName = () => `gatework-border-${st.patternNo}-${st.format}`;
+$('#dl-svg').addEventListener('click', () => saveFile(currentBorderName() + '.svg', borderSVG(st.seed, { transparent: st.transparent, tol: .3 }).svg));
+$('#dl-png').addEventListener('click', () => exportPNG(borderSVG(st.seed, { transparent: st.transparent, tol: .3 }).svg, currentBorderName() + '.png', 3300));
+$('#copy-svg').addEventListener('click', () => copyText(borderSVG(st.seed, { transparent: st.transparent, tol: .3 }).svg));
+
+/* ---------- Controls ---------- */
+const fmt = { band: v => (v * 100).toFixed(1) + '%', weight: v => v.toFixed(1) + '×', contrast: v => Math.round(v * 100) + '%' };
+$('#format').innerHTML = Object.entries(FORMATS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
+$('#swatches').innerHTML = PALETTES.map(p => `<button type="button" class="sw" data-p="${p.id}" title="${p.name}" aria-label="${p.name}" style="background:${p.paper}"><span style="background:${p.ink}"></span></button>`).join('');
+$('#chips').innerHTML = [['all', 'All'], ...EMB_ORDER.map(k => [k, EMB[k].name])].map(([k, n]) => `<button type="button" class="chip" data-t="${k}">${n}</button>`).join('');
+
+const SELECTS = ['format', 'pattern', 'centre', 'rail', 'finish'];
+function syncInputs() {
+  $('#seed').value = st.patternNo;
+  for (const id of [...SELECTS, 'band', 'weight', 'contrast', 'ink', 'paper']) $('#' + id).value = st[id];
+  for (const id of ['welds', 'garden', 'transparent']) $('#' + id).checked = st[id];
+  document.querySelectorAll('#detail button').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.d === st.detail)));
+  for (const id in fmt) $('#' + id + '-o').textContent = fmt[id](+st[id]);
+  document.querySelectorAll('.sw').forEach(b => { const p = PALETTES.find(x => x.id === b.dataset.p); b.setAttribute('aria-pressed', String(p.ink.toLowerCase() === st.ink.toLowerCase() && p.paper.toLowerCase() === st.paper.toLowerCase())); });
+  document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.t === st.embType)));
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === st.view)));
+  $('#view-borders').hidden = st.view !== 'borders'; $('#view-emb').hidden = st.view !== 'emb';
+  document.querySelectorAll('.only-border').forEach(el => el.hidden = st.view !== 'borders');
+}
+let raf = 0;
+function update() { save(); cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (st.view === 'borders') renderBorder(); else renderEmb(); }); }
+
+for (const id of SELECTS) $('#' + id).addEventListener('change', e => { st[id] = e.target.value; update(); });
+for (const id of ['band', 'weight', 'contrast']) $('#' + id).addEventListener('input', e => { st[id] = +e.target.value; $('#' + id + '-o').textContent = fmt[id](st[id]); update(); });
+$('#detail').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; st.detail = +b.dataset.d; syncInputs(); update(); });
+for (const id of ['welds', 'garden', 'transparent']) $('#' + id).addEventListener('change', e => { st[id] = e.target.checked; if (id !== 'transparent') update(); else save(); });
+for (const id of ['ink', 'paper']) $('#' + id).addEventListener('input', e => { st[id] = e.target.value; syncInputs(); update(); });
+$('#seed').addEventListener('change', e => { const v = Math.max(1, Math.min(9999, Math.round(+e.target.value) || 1)); selectDesign(v); st.varStart=Math.floor((v-1)/6)*6; e.target.value = v; update(); });
+$('#shuffle').addEventListener('click', () => { selectDesign(st.patternNo+1); st.varStart=Math.floor((st.patternNo-1)/6)*6; syncInputs(); update(); });
+$('#new-vars').addEventListener('click', () => { st.varStart += 6; update(); });
+$('#new-emb').addEventListener('click', () => { st.embStart += 12; update(); });
+$('#swatches').addEventListener('click', e => { const b = e.target.closest('.sw'); if (!b) return; const p = PALETTES.find(x => x.id === b.dataset.p); st.ink = p.ink; st.paper = p.paper; syncInputs(); update(); });
+$('#chips').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; st.embType = b.dataset.t; syncInputs(); update(); });
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { st.view = b.dataset.view; syncInputs(); update(); }));
+
+syncInputs(); update();
+</script>
